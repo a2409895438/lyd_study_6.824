@@ -16,19 +16,54 @@ mrapps/wc.go 有map和reduce函数
 
 ## 序列化存储
 
-json.NewEncoder       json.NewDecoder
+使用GO json库中的json.NewEncoder 与 json.NewDecoder
 
 ## 实现
 
 代码实现在6.5840/src/mr 下
 
-## 测试
+### 调度器 mr/coordinator.go
 
-bash test-mr.sh
+主要负责分发任务
 
-可以pass5个  失败2个
+```go
+type Coordinator struct {
+	// Your definitions here.
+	nReduce   int
+	nMap      int
+	TaskQueue chan *Task
+	TaskMap   map[int]*Task
+	Type      uint
+	mu        sync.Mutex
+}
 
-## 测试失败1
+type Task struct {
+	TaskId     int
+	File       string
+	TaskType   uint
+	NReduce    int
+	NMap       int
+	CreateTime int
+}
+```
+
+首先读取files字符串列表，建立Map任务并且分发任务到任务队列和任务列表
+
+同时启动任务切换和超时检查的协程
+
+任务切换：当任务列表TaskMap中没有任务的时候，切换任务状态  Map->Reduce->Exit   Exit状态目的是使程序退出os.Exit(0)
+
+超时检查：主要针对crash test，遍历检查TaskMap中的任务，当存活时间超过10秒的时候，重新将其加入任务队列
+
+### 任务器 mr/worker.go
+
+两次RPC通信：首先通过RPC通信向调度器请求任务，完成任务后再次通过RPC告诉调度器任务已经完成
+
+实现两个任务函数DoMapWork与DoReduceWork
+
+## 可能存在的测试BUG
+
+### 测试失败1
 
 *** Starting early exit test.
 test-mr.sh: line 259: wait: -n: invalid option
@@ -44,7 +79,7 @@ cmp: EOF on mr-wc-all-initial
 *** Starting early exit test.
 --- early exit test: PASS
 
-## 测试失败2
+### 测试失败2
 
 Starting crash test.
 
@@ -61,7 +96,7 @@ cmp: EOF on mr-crash-all
 
 需要对超过10S的任务进行舍弃,并且重新放入任务队列
 
-## 测试全部通过
+### 测试全部通过
 
 *** Starting wc test.
 --- wc test: PASS
