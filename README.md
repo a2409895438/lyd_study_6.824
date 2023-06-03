@@ -113,3 +113,10 @@ cmp: EOF on mr-crash-all
 *** Starting crash test.
 --- crash test: PASS
 *** PASSED ALL TESTS
+
+
+
+# Lab2: RAFT
+
+## 2A
+
