@@ -120,3 +120,12 @@ cmp: EOF on mr-crash-all
 
 ## 2A
 
+### 1. 先补充raft结构
+
+```go
+state        int //身份  1:LEADER 2:FOLLOWER 3:CANDICATE
+electTimeout int //选举超时时间
+voteFor      int //投票对象
+curTerm      int //目前任期
+```
+
