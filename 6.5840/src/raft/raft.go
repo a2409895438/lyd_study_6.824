@@ -295,7 +295,7 @@ func (rf *Raft) killed() bool {
 
 func (rf *Raft) ticker() {
 	for rf.killed() == false {
-		time.Sleep(time.Duration(100+rand.Intn(50)) * time.Millisecond)
+		time.Sleep(time.Duration(10) * time.Millisecond)
 
 		// fmt.Printf("目前server:%d 的身份为:%d 任期为:%d ,超时时间为：%v \n", rf.me, rf.state, rf.curTerm, rf.electTimeout)
 		// Your code here (2A)
@@ -389,7 +389,7 @@ func (rf *Raft) BeLeader() {
 				}()
 			}
 		}
-		time.Sleep(50 * time.Millisecond)
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
@@ -404,6 +404,7 @@ func (rf *Raft) BeLeader() {
 // for any long-running work.
 func Make(peers []*labrpc.ClientEnd, me int,
 	persister *Persister, applyCh chan ApplyMsg) *Raft {
+	rand.Seed(int64(me))
 	rf := &Raft{}
 	rf.peers = peers
 	rf.persister = persister
@@ -425,5 +426,5 @@ func Make(peers []*labrpc.ClientEnd, me int,
 }
 
 func SetElectTimeout() time.Time {
-	return time.Now().Add(time.Duration(150+(rand.Int63()%450)) * time.Millisecond) // 随机超时时间150-600
+	return time.Now().Add(time.Duration(50+(rand.Int63()%150)) * time.Millisecond) // 随机超时时间150-600
 }
